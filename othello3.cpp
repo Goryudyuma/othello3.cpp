@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <direct.h>
 
 #define SENTE 1
 #define GOTE -1
@@ -61,6 +62,14 @@ int senshu(int shiaisuu){
 		J_turn(shiaisuu);
 	}
 }
+
+int endflag(int shiaisuu){
+	/*ここに既読した時の処理の関数の呼び出しを入れる。*/
+}
+
+
+
+//ここから下はシステムに関わるもの。見るだけなら可、弄るのは不可。
 
 int J_turn(int shiaisuu){
 	for(i=0;i<=10;i++){
@@ -265,6 +274,7 @@ int main(){
 				J_passJud(shiaisuu);
 			}
 		}while(J_flag[0]!=2);
+		endflag(shiaisuu);
 		if(J_flag[1]==1){
 			J_hyouzi();
 		}
