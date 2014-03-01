@@ -15,7 +15,7 @@ int i,j,k,l,m,n,o,p;
 int x,y,z;
 int BAN[MASUmax+2][MASUmax+2];//ここにその時の盤面が入る。
 int hint[65];
-
+int tekinote[4]={0,0,0,0};
 
 
 //ここからメインプログラム。
@@ -27,16 +27,17 @@ int J_TE;
 int J_x,J_y;
 int J_wincount[3]={0,0,0};
 
+
 int henkan(int t){                               //変換する関数
 	if(t/100==3){
-		J_x=J_HINT[t%100]%10;
-		J_y=J_HINT[(t%100)]/10;
+		J_x=(J_HINT[t%100]-300)/10;
+		J_y=(J_HINT[t%100]-300)%10;
 	}else if(t/100==2){
 		J_x=((t%100)-1)%8+1;
 		J_y=((t%100)-1)/8+1;
 	}else if(t/100==1){
-		J_x=t%10;
-		J_y=(t%100)/10;
+		J_x=(t%100)/10;
+		J_y=t%10;
 	}
 }
 
@@ -53,13 +54,16 @@ int senshu(int shiaisuu){
 		henkan(301);
 	}else if(J_flag[4]==3){
 		henkan(AI());
-	}/*else if(J_flag[4]==4){
+	}
+	/*else if(J_flag[4]==4){
 		このあたりにAIの呼び出しをする
 		henkan(??);
 	}*/
 	
 	if(J_BAN[J_x][J_y]!=HINT){
 		J_turn(shiaisuu);
+	}else{
+		J_tekinote();
 	}
 }
 
@@ -70,6 +74,16 @@ int endflag(int shiaisuu){
 
 
 //ここから下はシステムに関わるもの。見るだけなら可、弄るのは不可。
+
+int J_tekinote(){
+	tekinote[1]=10*J_x+J_y+100;
+	tekinote[2]=J_x+8*(J_y-1)+200;
+	i=1;
+	while(J_HINT[i]-300!=J_x*10+J_y){
+		i++;
+	}
+	tekinote[3]=i+300;
+}
 
 int J_turn(int shiaisuu){
 	for(i=0;i<=10;i++){
@@ -148,6 +162,9 @@ int J_zyunbi(){                                  //初期化＆初期位置に駒を置く
 	J_BAN[4][5]=J_BAN[5][4]=SENTE;
 	J_BAN[4][4]=J_BAN[5][5]=GOTE;
 	J_teban=SENTE;
+	for(i=1;i<=3;i++){
+		tekinote[i]=0;
+	}
 }
 
 int J_passJud(int shiaisuu){                      //パス判定をする
@@ -186,6 +203,7 @@ int J_hikkurikaeshi(){
 
 int J_KANAME(int PorH){
 	if((J_BAN[x][y]==NONE||J_BAN[x][y]==HINT)&&x>=1&&x<=8&&y>=1&&y<=8){//駒がない&盤上でのみ判定。
+		J_flag[5]=0;
 		for(i=-1;i<=1;i++){
 			for(j=-1;j<=1;j++){                                        //そのマスの周り八マスを判定
 				if(!(i==0&&j==0)){
@@ -196,7 +214,9 @@ int J_KANAME(int PorH){
 					if(J_teban==J_BAN[x+p*i][y+p*j]&&p!=1){            //相手の駒ではなくなったとき、自分の駒なら、
 						if(PorH==1){
 							J_BAN[x][y]=HINT;                          //その場所がおけるという判定をし、
-							J_HINT[++o]=(x)+(y)*10;                    //その場所を記憶。
+							J_HINT[++o]=(x)*10+(y)+300;                //その場所を記憶。
+							J_flag[5]=1;
+							break;
 						}else if(PorH==2){
 							for(m=0;m<=p;m++){
 								J_BAN[x+m*i][y+m*j]=J_teban;           //置いたマスから自分のマスまでの敵の駒をひっくり返す。
@@ -204,6 +224,9 @@ int J_KANAME(int PorH){
 						}
 					}
 				}
+			}
+			if(J_flag[5]==1){
+				break;
 			}
 		}
 	}
